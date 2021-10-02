@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>DayTracker</title>
+
+  <!-- <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
+
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous"> -->
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+
+  <link rel="stylesheet" href="../globalStyles.css">
+
+  <script src="../DateTime.js"></script>
+  <script src="../Task.js"></script>
+  <script src="./taskEditorScript.js"></script>
+
+  <style type="text/css">
+
+  :root {
+    --color0: #C4DFE5;
+    --color1: #8fd6e1;
+    --color2: #1597bb;
+    --color3: #150e56;
+    --color4: #7b113a;
+  }
+
+  form {
+    margin-top: 10px;
+  }
+
+  .form-input-container {
+    margin-top: 5px;
+  }
+
+  #alertFail {
+    margin-top: 5px;
+    color: var(--color4);
+  }
+
+
+  </style>
+</head>
+<body>
+
+  <div class="page-container">
+
+
+    <div class="container-fluid header">
+      <h1>DayTracker</h1>
+      <hr>
+    </div>
+
+    <div class="page-content-container">
+      <h2>Task editor</h2>
+
+      <div id="buttonContainer">
+        <button id="btnCreateTask" class="btn btn-primary btn-daytracker">Create new task</button>
+        <button id="btnSelectTask" class="btn btn-primary btn-daytracker">Select an existing task to edit</button>
+        <div id="selectTaskContainer" hidden>
+          <label for="selectTask">Select task:</label>
+          <select class="form-control" id="selectTask">
+            <option>Select task</option>
+            <option>Test task 1</option>
+            <option>Test task 2</option>
+            <option>Test task 3</option>
+            <option>Test task 4</option>
+          </select>
+          <button id="btnConfirmSelected" class="btn btn-primary btn-daytracker">Confirm</button>
+        </div>
+      </div>
+
+
+
+      <!-- <div class="container-fluid form-container"> -->
+        <form id="formTaskEditor" class="row g-3" hidden>
+          <div class="form-input-container col-md-12">
+            <div id="formTitle" class="mb-3">
+              <label for="inputTitle" class="form-label">Title</label>
+              <input type="text" name="inputTitle" id="inputTitle" class="form-control">
+            </div>
+          </div>
+          <div class="form-input-container col-md-6">
+            <label class="form-label">Start:</label>
+            <div class="input-group col" id="datetimepicker1">
+              <input type="text" class="form-control" id="inputDateStart">
+              <div class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+              </div>
+            </div>
+          </div>
+          <div class="form-input-container col-md-6">
+            <label class="form-label">End</label>
+            <div class="input-group col" id="datetimepicker2">
+              <input type="text" class="form-control" id="inputDateEnd">
+              <div class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+              </div>
+            </div>
+          </div>
+          <div class="form-input-container col-md-12">
+            <button id="btnEditResources" type="submit" class="btn btn-primary btn-daytracker">Edit Resources</button>
+          </div>
+          <div class="form-input-container col-md-12">
+            <button id="btnSaveTask" type="submit" class="btn btn-primary btn-daytracker">Save task</button>
+          </div>
+          <div class="form-input-container col-md-12">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="inputIsFinished">
+              <label class="form-check-label" for="inputIsFinished">Finished</label>
+            </div>
+          </div>
+        </form>
+
+        <div id="alertReturn"></div>
+
+      <!-- </div> -->
+    </div>
+  </div>
+
+
+  <script type="text/javascript">
+    $("#alertReturn").hide();
+
+    $(function () {
+
+      $('#datetimepicker1').datetimepicker({
+        format:'DD/MM/YYYY HH:mm:ss'
+      });
+      $('#datetimepicker2').datetimepicker({
+        format:'DD/MM/YYYY HH:mm:ss',
+        useCurrent: false
+      });
+      $("#datetimepicker1").on("dp.change", function (e) {
+        $('#datetimepicker2').data("DateTimePicker").minDate(e.date);
+      });
+      $("#datetimepicker2").on("dp.change", function (e) {
+        $('#datetimepicker1').data("DateTimePicker").maxDate(e.date);
+      });
+    });
+
+
+    $("#btnCreateTask").click(function(){
+      $("#buttonContainer").hide();
+      $("#formTaskEditor").removeAttr('hidden');
+    });
+
+    $("#btnSelectTask").click(function(){
+      window.ipcHandler.send('windowTaskEditor:getTasks');
+    });
+
+
+    setupFunction('setSelectorOptions', function(e, data){
+      var tasks = makeTasks(data.tasks)
+      userTasks = tasks;
+      var selectorOptions = "<option value=\"-1\">Select task</option>";
+      for(var i = 0; i < tasks.length; i++){
+        selectorOptions += "<option value=\""+tasks[i].taskid+"\">";
+        selectorOptions += tasks[i].title;
+        selectorOptions += "</option>";
+      }
+      $("#selectTask").html(selectorOptions);
+      $("#selectTaskContainer").removeAttr('hidden');
+    });
+
+    window.ipcHandler.on("getTasks:success", setSelectorOptions);
+
+    setupFunction('updateTaskParameters', function(){
+      var task = selectedTask;
+      $("#inputTitle").attr('value', task.title);
+      $("#inputDateStart").attr('value', task.timestart?.getDateAsString());
+      $("#inputDateEnd").attr('value', task.timeend?.getDateAsString());
+      if(task.isfinished) $("#inputIsFinished").attr('checked', true);
+      $("#buttonContainer").hide();
+      $("#formTaskEditor").removeAttr('hidden');
+    });
+
+    $("#btnConfirmSelected").click(function(){
+      var selectedId = $("#selectTask option:selected").val();
+      if(selectedId != -1){
+        console.log(selectedId)
+        var temp = userTasks.filter((task) => {
+          return (task.taskid == selectedId)
+        });
+        console.log(temp);
+        if(temp.length > 0){
+          setSelectedTask(temp[0]);
+          updateTaskParameters();
+        }
+      }
+    });
+
+
+    setupFunction('openPresetTask', (e, compTask) => {
+      var task = makeTask(compTask);
+      console.log("openPresetTask");
+      console.log(task);
+      // $(".header h1").html("aaaaa");
+      setSelectedTask(task);
+      updateTaskParameters(selectedTask);
+    });
+
+    ipcHandler.on('openPresetTask', openPresetTask);
+
+
+    $("#btnEditResources").click(function(){
+      window.ipcHandler.send('windowTaskEditor:editResources', getSelectedTaskAsArray());
+    })
+
+    $("#btnSaveTask").click(function(){
+      const obj = {
+        title: $("#inputTitle").val(),
+        datetimeStart: $("#inputDateStart").val(),
+        datetimeEnd: $("#inputDateEnd").val(),
+        isFinished: $("#inputIsFinished").is(":checked")
+      };
+      if(selectedTask != null) obj.taskid = selectedTask?.taskid;
+      window.ipcHandler.send('windowTaskEditor:saveTask', obj);
+    });
+
+    window.ipcHandler.on('saveTask:success', () => {
+      alertReturn("Successfully saved the task!");
+    });
+
+    window.ipcHandler.on('saveTask:failed', () => {
+      alertReturn("Saving failed. Please try again.");
+    });
+
+    function alertReturn(message){
+      $("#alertReturn").show();
+      $("#alertReturn").html(message);
+      setTimeout(function() {
+        $("#alertReturn").hide();
+      }, 3000);
+    }
+
+    var Hey = 0;
+
+  </script>
+</body>
+</html>

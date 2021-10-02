@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>DayTracker</title>
+
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+
+  <link rel="stylesheet" href="../globalStyles.css">
+
+  <style type="text/css">
+
+
+
+  :root {
+    --color0: #C4DFE5;
+    --color1: #8fd6e1;
+    --color2: #1597bb;
+    --color3: #150e56;
+    --color4: #7b113a;
+  }
+
+
+
+  </style>
+</head>
+<body>
+
+  <div class="page-container">
+
+
+    <div class="container-fluid header">
+      <h1>DayTracker</h1>
+      <hr>
+    </div>
+
+    <div class="page-content-container">
+      <h2>Reports</h2>
+
+      <div id="staticBtns">
+        <button id="btnAllUserTasks" class="btn btn-primary btn-daytracker">All User Tasks</button>
+        <button id="btnTaskCompletionRate" class="btn btn-primary btn-daytracker">Task Completion Rate</button>
+        <button id="btnUserActivity" class="btn btn-primary btn-daytracker">User Activity</button>
+      </div>
+      <div id="adminBtns" hidden>
+
+      </div>
+      <div id="filtered">
+
+      </div>
+
+    </div>
+  </div>
+
+
+
+  <script>
+
+    var placeholder = true;
+
+    $("#btnAllUserTasks").click(function(){
+      console.log("Heyyy")
+      window.ipcHandler.send('windowReports:allUserTasks');
+    })
+
+    $("#btnTaskCompletionRate").click(function(){
+      console.log("Heyyy2")
+      window.ipcHandler.send('windowReports:taskCompletionRate');
+    })
+
+    $("#btnUserActivity").click(function(){
+      console.log("Heyyy3")
+      window.ipcHandler.send('windowReports:userActivity');
+    })
+
+    function filteredTasksReportTable(filters){
+      window.ipcHandler.send('windowReports:filtered', filters);
+    }
+
+  </script>
+</body>
+</html>

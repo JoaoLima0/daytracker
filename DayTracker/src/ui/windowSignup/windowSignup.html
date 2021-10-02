@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>DayTracker</title>
+
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+
+  <link rel="stylesheet" href="../globalStyles.css">
+
+  <style type="text/css">
+
+
+  :root {
+    --color0: #C4DFE5;
+    --color1: #8fd6e1;
+    --color2: #1597bb;
+    --color3: #150e56;
+    --color4: #7b113a;
+  }
+
+  form {
+    margin-top: 10px;
+  }
+
+  #alertFail {
+    margin-top: 5px;
+    color: var(--color4);
+  }
+
+  #btnLogin {
+    float: right;
+  }
+
+
+  /* form {
+    margin-left: 34px;
+  } */
+
+  /* .form-item {
+    display: inline-block;
+  } */
+
+  </style>
+</head>
+<body>
+
+  <div class="page-container">
+
+
+    <div class="container-fluid header">
+      <h1>DayTracker</h1>
+      <hr>
+    </div>
+
+    <div class="page-content-container">
+      <h2>Sign up</h2>
+      <!-- <div class="container-fluid form-container"> -->
+        <form>
+          <div id="formUsername" class="mb-3">
+            <label for="inputUsername" class="form-item form-label">Username</label>
+            <input type="text" name="inputUsername" id="inputUsername" class="form-control">
+          </div>
+          <div id="formPassword" class="form-item mb-3">
+            <label for="inputPassword" class="form-label">Password</label>
+            <input type="password" name="inputPassword" id="inputPassword" class="form-control">
+          </div>
+          <div id="formEmail" class="form-item mb-3">
+            <label for="inputEmail" class="form-label">Email</label>
+            <input type="email" name="inputEmail" id="inputEmail" class="form-control">
+          </div>
+          <button id="btnSignup" type="submit" class="btn btn-primary btn-daytracker">Sign up</button>
+          <button id="btnLogin" class="btn btn-primary btn-daytracker">Log into an existing account</button>
+        </form>
+
+        <div id="alertFail" hidden>Sign up failed. Please try again.</div>
+
+        <div id="alertSuccess" hidden>
+          <h3>Successfully created new account! Click here to be redirected to the log in page:</h3>
+          <button id="btnGotoLogin" class="btn btn-primary btn-daytracker">Go to Log in</button>
+        </div>
+
+        <!-- <button id="btnTest" class="btn btn-primary">Test</button> -->
+
+      <!-- </div> -->
+    </div>
+  </div>
+
+
+  <!-- <div id="btnTest" class="btn">Test</div>
+
+  <div id="btnLogin" class="btn">Request Login</div> -->
+
+
+  <script>
+  $("#btnTest").click(function(){
+    window.ipcHandler.send("windowSignup:test", null);
+  });
+
+  function alertFail(){
+    $("#alertFail").removeAttr('hidden');
+  }
+
+  window.ipcHandler.on('signup:failed', alertFail);
+
+  function alertSuccess(){
+    //Future: Pop up, modal, something that freezes the rest of the screen
+    $("#alertSuccess").removeAttr('hidden');
+    $("#btnSignup").attr('disabled');
+    $("#inputUsername").attr('disabled');
+    $("#inputPassword").attr('disabled');
+    $("#inputEmail").attr('disabled');
+
+  }
+
+  window.ipcHandler.on('signup:success', alertSuccess);
+
+
+
+  $("#btnSignup").click(function(){
+    $("#alertFail").attr('hidden');
+    var obj = {
+      username: $("#inputUsername").val(),
+      password: $("#inputPassword").val(),
+      email: $("#inputEmail").val()
+    }
+    window.ipcHandler.send('windowSignup:signup', obj);
+  });
+
+  $("#btnLogin").click(function(){
+    window.ipcHandler.send('openWindow', { windowName: 'login' });
+    window.ipcHandler.send('closeWindow', { windowName: 'signup' });
+  });
+
+  $("#btnGotoLogin").click(function(){
+    window.ipcHandler.send('openWindow', { windowName: 'login' });
+    window.ipcHandler.send('closeWindow', { windowName: 'signup' });
+  });
+  </script>
+</body>
+</html>

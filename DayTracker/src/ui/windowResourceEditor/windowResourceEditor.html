@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>DayTracker</title>
+
+  <!-- <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
+
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous"> -->
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+
+  <link rel="stylesheet" href="../globalStyles.css">
+
+  <script src="../DateTime.js"></script>
+  <script src="../Resource.js"></script>
+  <script src="../Task.js"></script>
+  <script src="./resourceEditorScript.js"></script>
+
+  <style type="text/css">
+
+  :root {
+    --color0: #C4DFE5;
+    --color1: #8fd6e1;
+    --color2: #1597bb;
+    --color3: #150e56;
+    --color4: #7b113a;
+  }
+
+  form {
+    margin-top: 10px;
+  }
+
+  .form-input-container {
+    margin-top: 5px;
+  }
+
+  #alertFail {
+    margin-top: 5px;
+    color: var(--color4);
+  }
+
+
+  </style>
+</head>
+<body>
+
+  <div class="page-container">
+
+
+    <div class="container-fluid header">
+      <h1>DayTracker</h1>
+      <hr>
+    </div>
+
+    <div class="page-content-container">
+      <h2>Resource editor</h2>
+
+      <div id="buttonContainer">
+        <button id="btnCreateResource" class="btn btn-primary btn-daytracker">Create new resource</button>
+        <button id="btnSelectResource" class="btn btn-primary btn-daytracker">Select a resource to edit</button>
+        <div id="selectResourceContainer" hidden>
+          <label for="selectResource">Select resource:</label>
+          <select class="form-control" id="selectResource">
+            <option>Select Resource</option>
+            <option>Test Resource 1</option>
+            <option>Test Resource 2</option>
+            <option>Test Resource 3</option>
+            <option>Test Resource 4</option>
+          </select>
+          <button id="btnConfirmSelected" class="btn btn-primary btn-daytracker">Confirm</button>
+        </div>
+      </div>
+
+
+
+      <!-- <div class="container-fluid form-container"> -->
+        <form id="formResourceEditor" class="row g-3" hidden> <!-- hidden -->
+          <div class="form-input-container col-md-12">
+            <div id="formName" class="mb-3">
+              <label for="inputName" class="form-label">Name</label>
+              <input type="text" name="inputName" id="inputName" class="form-control">
+            </div>
+            <div id="typeChoiceContainer" class="form-input-container col-md-12" hidden>
+              <label for="">Resource type: </label>
+              <div id="btnTypeTimer" class="btn btn-primary btn-daytracker">Timer</div>
+              <div id="btnTypeDescription" class="btn btn-primary btn-daytracker">Description</div>
+            </div>
+            <div id="formDivTimer">
+              <div id="formTimer" class="mb-3">
+                <label for="inputTimer" class="form-label">Timer</label>
+                <!-- <input type="text" name="inputTimer" id="inputTimer" class="form-control"> -->
+                <div class="input-group col" id="timepickerTimer">
+                  <input type="text" class="form-control" id="inputTimerTime">
+                  <div class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="formDivDescription">
+              <div id="formDescription" class="mb-3">
+                <label for="inputDescription" class="form-label">Description</label>
+                <!-- <input type="text" name="inputDescription" id="inputDescription" class="form-control"> -->
+                <input type="text" class="form-control" id="inputDescription">
+              </div>
+            </div>
+          </div>
+          <div class="form-input-container col-md-12">
+            <button id="btnSaveResource" type="submit" class="btn btn-primary btn-daytracker">Save Resource</button>
+          </div>
+        </form>
+
+        <div id="alertReturn"></div>
+
+      <!-- </div> -->
+    </div>
+  </div>
+
+
+  <script type="text/javascript">
+    var placeholder = 0;
+
+
+    $(function () {
+
+      $('#timepickerTimer').datetimepicker({
+        format:'HH:mm:ss',
+        useCurrent: false
+      });
+      // $('#datetimepicker2').datetimepicker({
+      //   format:'DD/MM/YYYY HH:mm:ss',
+      //   useCurrent: false
+      // });
+      // $("#datetimepicker1").on("dp.change", function (e) {
+      //   $('#datetimepicker2').data("DateTimePicker").minDate(e.date);
+      // });
+      // $("#datetimepicker2").on("dp.change", function (e) {
+      //   $('#datetimepicker1').data("DateTimePicker").maxDate(e.date);
+      // });
+    });
+
+    window.ipcHandler.on('windowResourceEditor:selectedTask', setSelectedTask);
+
+
+
+
+    $("#alertReturn").attr('hidden', 'true');
+
+    $("#btnCreateResource").click(function(){
+      $("#buttonContainer").attr('hidden', 'true');
+      $("#formResourceEditor").removeAttr('hidden');
+      $("#typeChoiceContainer").removeAttr('hidden');
+      $("#formDivTimer").attr('hidden', 'true');
+      $("#formDivDescription").attr('hidden', 'true');
+    });
+
+    $("#btnTypeTimer").click(function(){
+      selectedType = 'timer';
+      $("#formDivTimer").removeAttr('hidden');
+      $("#typeChoiceContainer").attr('hidden', 'true');
+    })
+
+    $("#btnTypeDescription").click(function(){
+      selectedType = 'description';
+      $("#formDivDescription").removeAttr('hidden');
+      $("#typeChoiceContainer").attr('hidden', 'true');
+    })
+
+    $("#btnSelectResource").click(function(){
+      window.ipcHandler.send('windowResourceEditor:getResources', selectedTask.compactAsArray());
+    });
+
+
+    setupFunction('setSelectorOptions', function(e, data){
+      console.log(e)
+      console.log(data)
+      var resources = makeResources(data)
+      userResources = resources;
+      var selectorOptions = "<option value=\"-1\">Select resource</option>";
+      console.log(resources.length)
+      for(var i = 0; i < resources.length; i++){
+        selectorOptions += "<option value=\""+resources[i].resourceid+"\">";
+        selectorOptions += capitalize(resources[i].type) + " - " + resources[i].name;
+        selectorOptions += "</option>";
+      }
+      $("#selectResource").html(selectorOptions);
+      $("#selectResourceContainer").removeAttr('hidden');
+    });
+
+    window.ipcHandler.on("getResources:success", setSelectorOptions);
+
+    setupFunction('updateResourceParameters', function(){
+      var resource = selectedResource;
+      console.log(resource)
+      $("#inputName").attr('value', resource.name);
+      if(resource.type == 'timer') {
+        $("#inputTimerTime").attr('value', resource.time);
+        $("#formDivTimer").removeAttr('hidden');
+        $("#formDivDescription").attr('hidden', 'true');
+      }
+      else if(resource.type == 'description') {
+        $("#inputDescription").attr('value', resource.msg);
+        $("#formDivDescription").removeAttr('hidden');
+        $("#formDivTimer").attr('hidden', 'true');
+      }
+      // $("#inputDateEnd").attr('value', resource.timeend?.getDateAsString());
+      // if(resource.isfinished) $("#inputIsFinished").attr('checked', true);
+      $("#buttonContainer").attr('hidden', 'true');
+      $("#formResourceEditor").removeAttr('hidden');
+    });
+
+    $("#btnConfirmSelected").click(function(){
+      var selectedId = $("#selectResource option:selected").val();
+      if(selectedId != -1){
+        console.log(selectedId)
+        var temp = userResources.filter((resource) => {
+          return (resource.resourceid == selectedId)
+        });
+        console.log(temp);
+        if(temp.length > 0){
+          setSelectedResource(temp[0]);
+          updateResourceParameters();
+        }
+      }
+    });
+
+
+    setupFunction('openPresetResource', (e, compResource) => {
+      var resource = makeResource(compResource);
+      console.log("openPresetResource");
+      console.log(resource);
+      // $(".header h1").html("aaaaa");
+      setSelectedResource(resource);
+      updateResourceParameters(selectedResource);
+    });
+
+    window.ipcHandler.on('openPresetResource', openPresetResource);
+
+
+
+
+    $("#btnSaveResource").click(function(){
+      var obj = selectedResource?.getAsObj() ?? { taskid: selectedTask.taskid, type: selectedType };
+      obj.name = $("#inputName").val() ?? obj.name;
+      if(obj.type == 'timer') obj.vals = $("#inputTimerTime").val();
+      else if(obj.type == 'description') obj.vals = $("#inputDescription").val();
+      console.log("-----")
+      console.log(obj)
+      console.log("-----")
+      window.ipcHandler.send('windowResourceEditor:saveResource', obj);
+    });
+
+    window.ipcHandler.on('saveResource:success', () => {
+      alertReturn("Successfully saved the resource!");
+      console.log("AAAAAAAAAAAAAAAAAAAAAAA")
+    });
+
+    window.ipcHandler.on('saveResource:failed', () => {
+      alertReturn("Saving failed. Please try again.");
+      console.log("EEEEEEEEEEEEEEEEEEEEEEE")
+    });
+
+    function alertReturn(message){
+      $("#alertReturn").show();
+      $("#alertReturn").html(message);
+      setTimeout(function() {
+        $("#alertReturn").attr('hidden', 'true');
+      }, 3000);
+    }
+
+    var Hey = 0;
+    //*/
+
+  </script>
+</body>
+</html>

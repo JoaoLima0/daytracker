@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>DayTracker</title>
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="../globalStyles.css">
+
+    <style type="text/css">
+
+
+    </style>
+  </head>
+  <body>
+
+    <div class="page-container">
+
+      <div class="container-fluid header">
+        <h1>DayTracker</h1>
+        <hr>
+      </div>
+
+      <div class="page-content-container">
+        <h2>Menu</h2>
+
+        <div id="btnLogin" class="btn btn-primary btn-daytracker">Log in</div>
+        <div id="btnSignup" class="btn btn-primary btn-daytracker">Sign up</div>
+        <h5 id="displayUser"></h5>
+        <hr>
+        <div id="btnTaskEditor" class="btn btn-primary btn-daytracker">Task editor</div>
+        <hr>
+        <div id="btnDayPlanner" class="btn btn-primary btn-daytracker">Day Planner</div>
+        <div id="btnWeekPlanner" class="btn btn-primary btn-daytracker">Week Planner</div>
+        <div class="adminOnly">
+          <hr>
+          <div id="btnReports" class="btn btn-primary btn-daytracker">Reports</div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+
+
+
+
+
+    <script>
+    $("#btnLogin").click(function(){
+      window.ipcHandler.send("openWindow", { windowName: 'login' });
+    });
+
+    $("#btnSignup").click(function(){
+      window.ipcHandler.send("openWindow", { windowName: 'signup' });
+    });
+
+    $("#btnTaskEditor").click(function(){
+      window.ipcHandler.send("openWindow", { windowName: 'taskeditor' });
+    });
+
+    $("#btnDayPlanner").click(function(){
+      window.ipcHandler.send("openWindow", { windowName: 'dayplanner', params: {width: 950} });
+    });
+
+    $("#btnWeekPlanner").click(function(){
+      window.ipcHandler.send("openWindow", { windowName: 'weekplanner' }); //, params: {width: 950}
+    });
+
+    $("#btnReports").click(function(){
+      window.ipcHandler.send("openWindow", { windowName: 'reports' }); // params: { nodeIntegration: true, contextIsolation: false  }, sendConUser: true
+    });
+
+    window.ipcHandler.on("windowMain:newUser", function(e, user){
+      $("#displayUser").html("Connected user: "+user.username);
+      if(user.userid == 2) $(".adminOnly").removeAttr('hidden');
+      // else $(".adminOnly").attr('hidden', 'true');
+    });
+
+    </script>
+  </body>
+</html>

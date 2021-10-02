@@ -1,0 +1,28 @@
+/*
+--color0: '#C4DFE5';
+--color1: #8fd6e1;
+--color2: #1597bb;
+--color3: #150e56;
+--color4: #7b113a;
+*/
+
+
+body {
+  background-color: #C4DFE5;
+  margin: 10px;
+  color: #150e56;
+}
+
+.header hr {
+  border-width: 3px;
+  border-color: #150e56;
+}
+
+.page-content-container {
+  padding: 10px 30px;
+  color: #150e56;
+}
+
+.btn-daytracker {
+  background-color: #1597bb;
+}

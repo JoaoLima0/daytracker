@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>DayTracker</title>
+
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+
+  <link rel="stylesheet" href="../styles/css/animatedArrows.css">
+  <link rel="stylesheet" href="../globalStyles.css">
+
+
+  <script src="libraries/p5.js"></script>
+  <script src="libraries/p5.dom.js"></script>
+  <script src="libraries/p5.sound.js"></script>
+  <script src="../DateTime.js"></script>
+  <script src="../Task.js"></script>
+  <script src="weekTableHandler.js"></script>
+
+  <style type="text/css">
+
+
+  :root {
+    --color0: #C4DFE5;
+    --color1: #8fd6e1;
+    --color2: #1597bb;
+    --color3: #150e56;
+    --color4: #7b113a;
+  }
+
+  body {
+    margin: 0px;
+    margin-top: 10px;
+  }
+
+
+  #canvasContainer {
+    width: 770px;
+    height: 302px;
+    border: 1px solid black;
+    margin: auto;
+  }
+
+  /* .page-container {
+    height: 600px;
+    width: 800px;
+  } */
+
+
+  .clear {
+    float: none;
+  }
+
+  .page-content-container {
+    height: 75px;
+    margin: auto;
+    width: 770px;
+  }
+
+  .page-content-container > h2 {
+    float: left;
+    display: inline;
+  }
+
+  .selector-container {
+    float: right;
+    display: inline;
+    /* margin-right: 10px; */
+  }
+
+  .table-view-container {
+    margin: auto;
+    width: 790px;
+    /* background-color: white; */
+  }
+
+  .task-info-container {
+    float: left;
+    width: auto;
+    height: 377px;
+    padding: 5px;
+    font-size: 24px;
+    /* background-color: grey; */
+    padding: 10px 30px;
+  }
+
+  .task-info-container .bold {
+    font-weight: bold;
+  }
+
+  #hoveredTaskInfo {
+    opacity: 0.25;
+  }
+
+  .positioningBlock {
+    height: 75px;
+  }
+
+
+
+
+
+  </style>
+</head>
+<body>
+
+  <div class="page-container">
+
+
+    <div class="container-fluid header">
+      <h1>DayTracker</h1>
+      <hr>
+    </div>
+
+    <div class="table-view-container">
+      <div class="page-content-container">
+        <h2>Week Planner</h2>
+
+        <div class="selector-container">
+          <div id="arrow_1" class="arrow-wrapper">
+            <div class="arrow arrow--left">
+              <span></span>
+            </div>
+
+            <div class="block"><h2>23/05 - 29/05</h2></div>
+
+            <div class="arrow arrow--right">
+              <span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="clear"></div>
+
+      </div>
+
+      <div id="canvasContainer">
+
+      </div>
+
+    </div>
+
+
+
+
+    <!-- <div class="selector-container">
+      <div class="arrow arrow-left">ᐸ</div>
+      <div id="curDay">May 25th</div>
+      <div class="arrow arrow-right">ᐳ</div>
+    </div> -->
+
+    <!-- arrow-right: ᐳ  arrow-left: ᐸ -->
+
+
+
+
+
+  </div>
+
+
+  <!-- <div id="btnTest" class="btn">Test</div>
+
+  <div id="btnLogin" class="btn">Request Login</div> -->
+
+
+  <script>
+    var PLACEHOLDER;
+    // window.ipcHandler.send('windowDayPlanner:getTasksFromDay', {
+    //   day: "25/05/2021"
+    // });
+
+    function requestTasks(day, month, year){
+      var sunday = (day < 10) ? "0" + day : day;
+      sunday += "/" + ((month < 10) ? "0" + month : month);
+      sunday += "/" + year;
+      console.log(sunday);
+      var week = {
+        sunday: sunday
+      }
+      window.ipcHandler.send('windowWeekPlanner:getTasksFromWeek', {
+        week: week
+      });
+    }
+
+    requestTasks(23, 5, 2021);
+
+    setFuncRequestTasks(requestTasks);
+
+    window.ipcHandler.on("getTasksFromWeek:success", updateCanvas);
+
+    //var receivedTasks;
+
+    function updateCanvas(e, data){
+      console.log(data.tasks)
+      // $(".block > h2").html(data.day.slice(0, 5));
+      //receivedTasks = data.tasks;
+      resetTasks();
+      for(var i = 0; i < data.tasks.length; i++){
+        addTask(data.tasks[i], data.week);
+      }
+    }
+
+    $(".arrow--left").click(function(){
+      changeDate(false);
+    });
+
+    $(".arrow--right").click(function(){
+      changeDate(true);
+    });
+
+
+
+
+    /*
+
+
+    setFuncRequestTasks(requestTasks);
+
+
+    var curHovTask = null;
+    var curTask = null;
+
+    setUpdateInfoFunction(updateTaskInfo);
+
+    function updateTaskInfo(targetTask, hover){
+      if(targetTask == null){
+        $("#hoveredTitle").html("");
+        return;
+      }
+      if(hover){
+        $("#hoveredTitle").html(targetTask.task.title);
+        curHovTask = targetTask;
+      } else {
+        $("#infoTitle").html(targetTask.task.title);
+        curTask = targetTask;
+        if(!targetTask.task.isfinished){
+          $("#infoNotFin").html("Not ");
+        } else {
+          $("#infoNotFin").html("");
+        }
+      }
+    }
+
+    $(".arrow--left").click(function(){
+      changeDate(false);
+    });
+
+    $(".arrow--right").click(function(){
+      changeDate(true);
+    });
+
+    $("#btnEditTask").click(function(){
+      ipcHandler.send('openTaskInEditor', curTask);
+    })
+
+
+
+    */
+  </script>
+</body>
+</html>
